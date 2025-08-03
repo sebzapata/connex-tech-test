@@ -1,8 +1,4 @@
-import {
-  Box,
-  Grid,
-  Typography,
-} from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { Weather } from './weather/Weather';
 import { ContactsList } from './contacts/ContactsList';
 
