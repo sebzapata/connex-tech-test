@@ -25,7 +25,15 @@ export default function Dashboard() {
         >
           <ContactsList />
         </Grid>
-        <Datatable />
+        <Grid
+          size={{
+            xs: 12,
+            md: 8,
+            lg: 10,
+          }}
+        >
+          <Datatable />
+        </Grid>
       </Grid>
     </Box>
   );
