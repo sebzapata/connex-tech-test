@@ -49,6 +49,17 @@ export type Interactions200 = {
   data: Interactions200DataItem[];
 };
 
+export type InteractionStats200DataItem = {
+  interaction_date?: string;
+  agent_name?: string;
+  interaction_count?: number;
+  average_length_seconds?: number;
+};
+
+export type InteractionStats200 = {
+  data: InteractionStats200DataItem[];
+};
+
 export type Contacts200DataItem = {
   id?: number;
   name?: string;
@@ -447,6 +458,149 @@ export function useInteractions<
 }
 
 /**
+ * Fetches interaction stats
+ */
+export const interactionStats = (
+  options?: AxiosRequestConfig
+): Promise<AxiosResponse<InteractionStats200>> => {
+  return axios.get(`/interaction-stats`, options);
+};
+
+export const getInteractionStatsQueryKey = () => {
+  return [`/interaction-stats`] as const;
+};
+
+export const getInteractionStatsQueryOptions = <
+  TData = Awaited<ReturnType<typeof interactionStats>>,
+  TError = AxiosError<unknown>
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof interactionStats>>, TError, TData>
+  >;
+  axios?: AxiosRequestConfig;
+}) => {
+  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getInteractionStatsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof interactionStats>>
+  > = ({ signal }) => interactionStats({ signal, ...axiosOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof interactionStats>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type InteractionStatsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof interactionStats>>
+>;
+export type InteractionStatsQueryError = AxiosError<unknown>;
+
+export function useInteractionStats<
+  TData = Awaited<ReturnType<typeof interactionStats>>,
+  TError = AxiosError<unknown>
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof interactionStats>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof interactionStats>>,
+          TError,
+          Awaited<ReturnType<typeof interactionStats>>
+        >,
+        'initialData'
+      >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useInteractionStats<
+  TData = Awaited<ReturnType<typeof interactionStats>>,
+  TError = AxiosError<unknown>
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof interactionStats>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof interactionStats>>,
+          TError,
+          Awaited<ReturnType<typeof interactionStats>>
+        >,
+        'initialData'
+      >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useInteractionStats<
+  TData = Awaited<ReturnType<typeof interactionStats>>,
+  TError = AxiosError<unknown>
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof interactionStats>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useInteractionStats<
+  TData = Awaited<ReturnType<typeof interactionStats>>,
+  TError = AxiosError<unknown>
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof interactionStats>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getInteractionStatsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
  * Fetches all contacts
  */
 export const contacts = (
@@ -749,6 +903,30 @@ export const getInteractionsResponseMock = (
   ...overrideResponse,
 });
 
+export const getInteractionStatsResponseMock = (
+  overrideResponse: Partial<InteractionStats200> = {}
+): InteractionStats200 => ({
+  data: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1
+  ).map(() => ({
+    interaction_date: faker.helpers.arrayElement([
+      faker.date.past().toISOString().split('T')[0],
+      undefined,
+    ]),
+    agent_name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    interaction_count: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    average_length_seconds: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+  })),
+  ...overrideResponse,
+});
+
 export const getContactsResponseMock = (
   overrideResponse: Partial<Contacts200> = {}
 ): Contacts200 => ({
@@ -844,6 +1022,27 @@ export const getInteractionsMockHandler = (
   });
 };
 
+export const getInteractionStatsMockHandler = (
+  overrideResponse?:
+    | InteractionStats200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0]
+      ) => Promise<InteractionStats200> | InteractionStats200)
+) => {
+  return http.get('*:3333/interaction-stats', async (info) => {
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getInteractionStatsResponseMock()
+      ),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  });
+};
+
 export const getContactsMockHandler = (
   overrideResponse?:
     | Contacts200
@@ -889,6 +1088,7 @@ export const getConnexTechTestAPIMock = () => [
   getWeatherMockHandler(),
   getTimeMockHandler(),
   getInteractionsMockHandler(),
+  getInteractionStatsMockHandler(),
   getContactsMockHandler(),
   getAgentsMockHandler(),
 ];
