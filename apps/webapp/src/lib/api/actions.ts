@@ -52,8 +52,8 @@ export type Interactions200 = {
 export type InteractionStats200DataItem = {
   interaction_date?: string;
   agent_name?: string;
-  interaction_id?: string;
-  length_seconds?: number;
+  interaction_count?: number;
+  average_length_seconds?: number;
 };
 
 export type InteractionStats200 = {
@@ -915,11 +915,11 @@ export const getInteractionStatsResponseMock = (
       undefined,
     ]),
     agent_name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-    interaction_id: faker.helpers.arrayElement([
-      faker.string.alpha(20),
+    interaction_count: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
       undefined,
     ]),
-    length_seconds: faker.helpers.arrayElement([
+    average_length_seconds: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
       undefined,
     ]),

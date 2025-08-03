@@ -1,6 +1,7 @@
 import { Box, Grid, Typography } from '@mui/material';
 import { Weather } from './weather/Weather';
 import { ContactsList } from './contacts/ContactsList';
+import Datatable from './datatable/datatable';
 
 export default function Dashboard() {
   return (
@@ -24,7 +25,7 @@ export default function Dashboard() {
         >
           <ContactsList />
         </Grid>
-        {/* Datatable */}
+        <Datatable />
       </Grid>
     </Box>
   );

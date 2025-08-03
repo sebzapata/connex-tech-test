@@ -7,10 +7,11 @@ const interactionStatsQuery = sequelize.query(
       SELECT 
         DATE(i.created_at) as interaction_date,
         a.name as agent_name,
-        i.id as interaction_id,
-        i.length_seconds
+        COUNT(i.id) as interaction_count,
+        AVG(i.length_seconds) as average_length_seconds
       FROM Interactions i
       JOIN Agents a ON i.agent_id = a.id
+      GROUP BY DATE(i.created_at), i.agent_id, a.name
       ORDER BY i.created_at DESC, a.name ASC
     `
 );
@@ -18,7 +19,7 @@ const interactionStatsQuery = sequelize.query(
 export const GET: Operation = async (req: Request, res: Response) => {
   const interactionStats = await interactionStatsQuery;
 
-  return res.send({ data: interactionStats });
+  return res.send({ data: interactionStats[0] });
 };
 
 GET.apiDoc = {
@@ -41,10 +42,10 @@ GET.apiDoc = {
                     agent_name: {
                       type: 'string',
                     },
-                    interaction_id: {
-                      type: 'string',
+                    interaction_count: {
+                      type: 'number',
                     },
-                    length_seconds: {
+                    average_length_seconds: {
                       type: 'number',
                     },
                   },
