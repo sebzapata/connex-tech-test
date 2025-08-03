@@ -33,9 +33,9 @@ const Datatable = () => {
   const interactionStats = data?.data.data;
 
   const visibleRows = React.useMemo(() => {
-    function getComparator<Key extends keyof InteractionStats200DataItem>(
+    function getComparator(
       order: Order,
-      orderBy: Key
+      orderBy: keyof InteractionStats200DataItem
     ): (
       a: InteractionStats200DataItem,
       b: InteractionStats200DataItem

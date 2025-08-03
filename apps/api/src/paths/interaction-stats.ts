@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Operation } from 'express-openapi';
 import { sequelize } from '../service/sequelize';
+import { QueryTypes } from 'sequelize';
 
 const interactionStatsQuery = sequelize.query(
   `
@@ -13,13 +14,14 @@ const interactionStatsQuery = sequelize.query(
       JOIN Agents a ON i.agent_id = a.id
       GROUP BY DATE(i.created_at), i.agent_id, a.name
       ORDER BY i.created_at DESC, a.name ASC
-    `
+    `,
+  { type: QueryTypes.SELECT }
 );
 
 export const GET: Operation = async (req: Request, res: Response) => {
   const interactionStats = await interactionStatsQuery;
 
-  return res.send({ data: interactionStats[0] });
+  return res.send({ data: interactionStats });
 };
 
 GET.apiDoc = {
