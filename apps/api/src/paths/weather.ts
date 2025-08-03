@@ -4,11 +4,13 @@ import { locationCoords } from '../util/locationCoords';
 import { coordsToTemp } from '../util/coordsToTemp';
 
 export const GET: Operation = async (req: Request, res: Response) => {
-  const result = Object.keys(locationCoords).map(async (key) => {
-    const coords = locationCoords[key];
-    const temp = await coordsToTemp(coords.lat, coords.long);
-    return { location: key, temp };
-  });
+  const result = await Promise.all(
+    Object.keys(locationCoords).map(async (key) => {
+      const coords = locationCoords[key];
+      const temp = await coordsToTemp(coords.lat, coords.long);
+      return { location: key, temp };
+    })
+  );
 
   return res.send({ data: result });
 };
